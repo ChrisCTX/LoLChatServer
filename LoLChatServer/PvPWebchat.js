@@ -43,7 +43,7 @@ userConversations = {
                                         "esumike": ["this kid", "kreygasm"]
                         }
                     };
-// End of mockup conversation
+// End of mock conversations
 
 server.sockets.on("connection", function(userSocket)
 {
@@ -111,7 +111,23 @@ server.sockets.on("connection", function(userSocket)
 
     userSocket.on("MessageFromClient", function(user_message)
     {
+        var from = user_message.from;
+        var to = user_message.to;
 
+        // While normally we would sanitize the text here
+        // we will leave that to jQuery's text() and val() functions
+        // since they already has a very robust implementations
+        // that we can't really match given our time-line.
+        var text = user_message.text;
+
+        // We append it to the conversation
+        userConversations[to][from].append(text);
+
+        // And if the destination is connected, we push the update
+        if (to in userSockets)
+        {
+            userSockets[to].emit("MessageFromServer", userConversations[to]);
+        }
     });
 
 });
