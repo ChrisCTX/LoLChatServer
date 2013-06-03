@@ -3,7 +3,7 @@ var server = require("socket.io").listen(6969);
 // The following global variables are where information is stored (in memory)
 
 var userPasswords;      // A user=>password dictionary
-var userSockets;        // A user=>socket dictionary
+var userSockets = {};        // A user=>socket dictionary
 var userContactLists;   // A user=>List of strings dictionary
 var userConversations;  // A <user, dictionary<contact, list<messages>>> dictionary
 
@@ -63,7 +63,7 @@ server.sockets.on("connection", function(userSocket)
             if (login_request.password == userPasswords[name])
             {
                 // We update his socket (in case he is re-logging)
-                userSockets[name] = userSocket.id;
+                userSockets[name] = userSocket;
 
                 // We auth him and send him his contacts and messages
                 var response = {auth: true,
@@ -121,7 +121,7 @@ server.sockets.on("connection", function(userSocket)
         var text = user_message.text;
 
         // We append it to the conversation
-        userConversations[to][from].append(text);
+        userConversations[to][from].push(text);
 
         // And if the destination is connected, we push the update
         if (to in userSockets)
